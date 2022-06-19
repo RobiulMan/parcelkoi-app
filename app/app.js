@@ -1,31 +1,17 @@
 import express from "express";
+import dotenv from "dotenv";
 import morgan from "morgan";
 import configure from "./controllers";
-import { handleError } from "./middlewares/handleError";
+
+import { infoLogger, errorLogger } from "./logger";
+import { handleError, handleRequest } from "./middlewares";
+
 import { connectionWithDb, DbUri } from "./mongo";
-import winston from "winston";
-import expressWinston from "express-winston";
-import winstonFile from "winston-daily-rotate-file";
-import winstonMongo from "winston-mongodb";
-import { ElasticsearchTransport } from "winston-elasticsearch";
-
+dotenv.config();
 const app = express();
-configure(app);
+console.log(process.env.ENVIRONEMENT);
 app.use(express.json());
-
-const processRequest = async (req, res, next) => {
-  let correlationId = req.headers["x-correlation-id"];
-  if (!correlationId) {
-    correlationId = Date.now().toString();
-    req.headers["x-correlation-id"] = correlationId;
-  }
-
-  res.set("x-correlation-id", correlationId);
-
-  return next();
-};
-
-app.use(processRequest);
+app.use(handleRequest);
 
 //terminal log checker
 app.use(morgan("dev"));
@@ -33,61 +19,14 @@ app.use(morgan("dev"));
 //DataBase Connnection
 connectionWithDb();
 
-const getMessage = (req, res) => {
-  let obj = {
-    correlationId: req.headers["x-correlation-id"],
-    requestBody: req.body,
-  };
-
-  return JSON.stringify(obj);
-};
-
-const fileInfoTransport = new winston.transports.DailyRotateFile({
-  filename: "log-info-%DATE%.log",
-  datePattern: "yyyy-mm-DD-HH",
-});
-
-const fileErrrorTransport = new winston.transports.DailyRotateFile({
-  filename: "log-error-%DATE%.log",
-  datePattern: "yyyy-mm-DD-HH",
-});
-const mongoErrorTransport = new winston.transports.MongoDB({
-  db: DbUri,
-  metaKey: "meta",
-});
-const elasticsearchOptions = {
-  level: "info",
-  clientOpts: { node: "http://localhost:9200" },
-  indexPrefix: "log-parcelkoi",
-};
-const esTransport = new ElasticsearchTransport(elasticsearchOptions);
-const infoLogger = expressWinston.logger({
-  transports: [
-    new winston.transports.Console(),
-    fileInfoTransport,
-    esTransport,
-  ],
-  format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.json()
-  ),
-  meta: true,
-  msg: getMessage,
-});
-
-const errorLogger = expressWinston.errorLogger({
-  transports: [
-    new winston.transports.Console(),
-    fileErrrorTransport,
-    mongoErrorTransport,
-    esTransport,
-  ],
-});
-
-app.use(infoLogger);
+if (process.env.ENVIRONEMENT != "TEST") {
+  app.use(infoLogger);
+}
 configure(app);
 
-app.use(errorLogger);
+if (process.env.ENVIRONEMENT != "TEST") {
+  app.use(errorLogger(DbUri));
+}
 app.use(handleError);
 
 export default app;
