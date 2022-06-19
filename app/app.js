@@ -9,9 +9,8 @@ import winstonFile from "winston-daily-rotate-file";
 import winstonMongo from "winston-mongodb";
 import { ElasticsearchTransport } from "winston-elasticsearch";
 
-const port = 4010;
 const app = express();
-configure;
+configure(app);
 app.use(express.json());
 
 const processRequest = async (req, res, next) => {
@@ -90,6 +89,5 @@ configure(app);
 
 app.use(errorLogger);
 app.use(handleError);
-app.listen(port, () => {
-  console.log("Listening to port");
-});
+
+export default app;
