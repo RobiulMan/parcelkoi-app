@@ -7,7 +7,7 @@ import {
 } from "../services/userService";
 
 import validates from "../models/view-models";
-import { handleValidation } from "../middlewares/handleValidations";
+import { handleValidation } from "../middlewares";
 
 const router = express.Router();
 
