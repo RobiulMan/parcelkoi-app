@@ -7,6 +7,6 @@ export const connectionWithDb = () => {
   mongoose.connect(DbUri, options, (err, db) => {
     if (err) {
       throw err;
-    }
+    } else log("database connection established");
   });
 };
