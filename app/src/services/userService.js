@@ -5,6 +5,7 @@ export const saveUser = async (user) => {
   try {
     const userModel = new models.User(user);
     const saveUser = await userModel.save();
+
     return saveUser;
   } catch (err) {
     console.log(err);
@@ -14,6 +15,12 @@ export const saveUser = async (user) => {
 export const getAllUser = async () => {
   const User = models.User;
   const users = await User.find();
+  return users;
+};
+
+export const getUserById = async (id) => {
+  const User = models.User;
+  const users = await User.findById(id);
   return users;
 };
 

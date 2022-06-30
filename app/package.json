@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --es-module-specifier-resolution=node server.js",
-    "test": "jest"
+    "dev": "nodemon --es-module-specifier-resolution=node ./src/server.js",
+    "test": "jest  --runInBand --force-exit "
   },
   "dependencies": {
     "dotenv": "^16.0.1",
@@ -25,6 +25,7 @@
     "@babel/core": "^7.18.5",
     "@babel/preset-env": "^7.18.2",
     "babel-jest": "^28.1.1",
+    "jest": "^28.1.1",
     "superagent": "^7.1.6",
     "supertest": "^6.2.3"
   }
